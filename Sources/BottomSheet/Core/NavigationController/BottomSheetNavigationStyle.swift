@@ -84,7 +84,9 @@ public final class BottomSheetNavigationAnimatedTransitioning: NSObject, UIViewC
         )
 
         var maxHeight = containerViewWindow.bounds.size.height - containerViewWindow.safeAreaInsets.top
-        if case .visible(let appearance) = configuration.pullBarConfiguration {
+        if case .outvisible(let appearance) = configuration.pullBarConfiguration {
+            maxHeight -= appearance.height
+        } else if case .insidevisible(let appearance) = configuration.pullBarConfiguration {
             maxHeight -= appearance.height
         }
 

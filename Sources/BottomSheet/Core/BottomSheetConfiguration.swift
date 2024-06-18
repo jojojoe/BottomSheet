@@ -19,21 +19,24 @@ public struct BottomSheetConfiguration {
         }
 
         case hidden
-        case visible(PullBarAppearance)
+        case insidevisible(PullBarAppearance)
+        case outvisible(PullBarAppearance)
 
-        public static let `default`: PullBarConfiguration = .visible(PullBarAppearance(height: 20))
+        public static let `default`: PullBarConfiguration = .outvisible(PullBarAppearance(height: 20))
     }
 
     public struct ShadowConfiguration {
         public let backgroundColor: UIColor
+        public let pullColor: UIColor
         public let blur: UIBlurEffect.Style?
 
-        public init(backgroundColor: UIColor, blur: UIBlurEffect.Style? = nil) {
+        public init(backgroundColor: UIColor, pullColor: UIColor, blur: UIBlurEffect.Style? = nil) {
             self.backgroundColor = backgroundColor
+            self.pullColor = pullColor
             self.blur = blur
         }
 
-        public static let `default` = ShadowConfiguration(backgroundColor: UIColor.black.withAlphaComponent(0.6))
+        public static let `default` = ShadowConfiguration(backgroundColor: UIColor.black.withAlphaComponent(0.6), pullColor: UIColor.red)
     }
 
     public let cornerRadius: CGFloat

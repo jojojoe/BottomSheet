@@ -52,9 +52,29 @@ final class RootViewController: UIViewController {
     @objc
     private func handleShowBottomSheet() {
         let viewController = ResizeViewController(initialHeight: 300)
+        /*
+         // 默认状态
+         presentBottomSheetInsideNavigationController(
+             viewController: viewController,
+             configuration: .default,
+             canBeDismissed: {
+                 // return `true` or `false` based on your business logic
+                 true
+             },
+             dismissCompletion: {
+                 // handle bottom sheet dismissal completion
+             }
+         )
+         */
+        // 自定义，sheet的上拉按钮在View内部
+        let customConfig = BottomSheetConfiguration(
+            cornerRadius: 10,
+            pullBarConfiguration: .insidevisible(.init(height: 20)),
+            shadowConfiguration: .init(backgroundColor: UIColor.black.withAlphaComponent(0.6), pullColor: UIColor.white)
+        )
         presentBottomSheetInsideNavigationController(
             viewController: viewController,
-            configuration: .default,
+            configuration: customConfig,
             canBeDismissed: {
                 // return `true` or `false` based on your business logic
                 true

@@ -265,8 +265,20 @@ public final class BottomSheetPresentationController: UIPresentationController {
         presentedViewController.view.clipsToBounds = true
 
         pullBar?.layer.mask = nil
-        presentedViewController.view.layer.cornerRadius = configuration.cornerRadius
-        presentedViewController.view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+
+        if case .outvisible(let appearance) = configuration.pullBarConfiguration {
+            presentedViewController.view.layer.cornerRadius = configuration.cornerRadius
+            presentedViewController.view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            pullBar?.centerView.backgroundColor = configuration.shadowConfiguration.pullColor
+        } else if case .insidevisible(let appearance) = configuration.pullBarConfiguration {
+            pullBar?.backgroundColor = presentedViewController.view.backgroundColor
+            pullBar?.layer.cornerRadius = configuration.cornerRadius
+            pullBar?.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            pullBar?.centerView.backgroundColor = configuration.shadowConfiguration.pullColor
+        } else {
+            presentedViewController.view.layer.cornerRadius = configuration.cornerRadius
+            presentedViewController.view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        }
     }
 
     private func addSubviews() {
@@ -280,12 +292,22 @@ public final class BottomSheetPresentationController: UIPresentationController {
     }
 
     private func addPullBarIfNeeded(containerView: UIView) {
-        guard case .visible(let appearance) = configuration.pullBarConfiguration else { return }
-        let pullBar = PullBar()
-        pullBar.frame.size = CGSize(width: containerView.frame.width, height: appearance.height)
-        containerView.addSubview(pullBar)
-
-        self.pullBar = pullBar
+        switch configuration.pullBarConfiguration {
+        case .hidden:
+            return
+        case .insidevisible(let pullBarAppearance):
+            let pullBar = PullBar()
+            pullBar.frame.size = CGSize(width: containerView.frame.width, height: pullBarAppearance.height)
+            containerView.addSubview(pullBar)
+            self.pullBar = pullBar
+        case .outvisible(let pullBarAppearance):
+            let pullBar = PullBar()
+            pullBar.frame.size = CGSize(width: containerView.frame.width, height: pullBarAppearance.height)
+            containerView.addSubview(pullBar)
+            self.pullBar = pullBar
+        }
+//        guard case .outvisible(let appearance) = configuration.pullBarConfiguration else { return }
+//        guard case .insidevisible(let appearance) = configuration.pullBarConfiguration else { return }
     }
 
     private func addShadow(containerView: UIView) {
@@ -327,7 +349,9 @@ public final class BottomSheetPresentationController: UIPresentationController {
 
         let preferredHeight = presentedViewController.preferredContentSize.height + windowInsets.bottom
         var maxHeight = containerView.bounds.height - windowInsets.top
-        if case .visible(let appearance) = configuration.pullBarConfiguration {
+        if case .outvisible(let appearance) = configuration.pullBarConfiguration {
+            maxHeight -= appearance.height
+        } else if case .insidevisible(let appearance) = configuration.pullBarConfiguration {
             maxHeight -= appearance.height
         }
         let height = min(preferredHeight, maxHeight)
@@ -349,7 +373,9 @@ public final class BottomSheetPresentationController: UIPresentationController {
         let targetFrame = targetFrameForPresentedView()
         if !oldFrame.isAlmostEqual(to: targetFrame) {
             presentedView.frame = targetFrame
-            if case .visible(let appearance) = configuration.pullBarConfiguration {
+            if case .outvisible(let appearance) = configuration.pullBarConfiguration {
+                pullBar?.frame.origin.y = presentedView.frame.minY - appearance.height + pixelSize
+            } else if case .insidevisible(let appearance) = configuration.pullBarConfiguration {
                 pullBar?.frame.origin.y = presentedView.frame.minY - appearance.height + pixelSize
             }
         }
@@ -538,9 +564,14 @@ extension BottomSheetPresentationController: UIViewControllerAnimatedTransitioni
         )
 
         let updatePullBarFrame = {
-            guard case .visible(let appearnce) = self.configuration.pullBarConfiguration else { return }
-
-            self.pullBar?.frame.origin.y = presentedView.frame.minY - appearnce.height + pixelSize
+            switch self.configuration.pullBarConfiguration {
+            case .hidden:
+                return
+            case .insidevisible(let pullBarAppearance):
+                self.pullBar?.frame.origin.y = presentedView.frame.minY - pullBarAppearance.height + pixelSize
+            case .outvisible(let pullBarAppearance):
+                self.pullBar?.frame.origin.y = presentedView.frame.minY - pullBarAppearance.height + pixelSize
+            }
         }
 
         presentedView.frame = isPresenting ? offscreenFrame : frameInContainer
