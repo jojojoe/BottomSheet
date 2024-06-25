@@ -7,7 +7,7 @@ Pod::Spec.new do |spec|
   spec.author       = "Joom"
   spec.ios.deployment_target = "12.0"
   spec.source       = { 
-    :git => "https://github.com/joomcode/BottomSheet.git", 
+    :git => "https://github.com/jojojoe/BottomSheet.git", 
     :tag => "#{spec.version}",
     :submodules => true
   }
